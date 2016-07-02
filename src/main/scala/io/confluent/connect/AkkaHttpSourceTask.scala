@@ -1,6 +1,7 @@
 package io.confluent.connect
 
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
+import io.confluent.connect.util.Version
 import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 
@@ -21,29 +22,28 @@ class AkkaHttpSourceTask extends SourceTask {
   }
 
   override def poll(): java.util.List[SourceRecord] = {
-    val sourcePartitions = new java.util.HashMap[String, String]()
-    sourcePartitions.put("request", "akka-http")
-
-    val sourceOffsets = new java.util.HashMap[String, String]()
-    sourceOffsets.put("pos", requestCount.toString)
-
-    val record = new SourceRecord(sourcePartitions, sourceOffsets, topic, schema, "Hello World")
-
-    val records = new java.util.ArrayList[SourceRecord]()
-    records.add(record)
-    requestCount += 1
-
-    records
+    null
   }
 
   override def version(): String = {
-    null
+    Version.getVersion()
   }
 
   def asyncHandler(request: HttpRequest): Future[HttpResponse] = {
     request match {
       case HttpRequest(HttpMethods.GET, _, _, _, _) =>
         Future[HttpResponse] {
+          val sourcePartitions = new java.util.HashMap[String, String]()
+          sourcePartitions.put("request", "akka-http")
+
+          val sourceOffsets = new java.util.HashMap[String, String]()
+          sourceOffsets.put("pos", requestCount.toString)
+
+          val record = new SourceRecord(sourcePartitions, sourceOffsets, topic, schema, "Hello World" + requestCount)
+
+          commitRecord(record)
+          requestCount += 1
+
           HttpResponse(entity = "Hello World")
         }
     }
