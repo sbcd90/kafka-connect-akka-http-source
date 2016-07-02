@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
-  private val topic = "test8"
+  private val topic = "test9"
   private val schema = Schema.STRING_SCHEMA
   private var requestCount: Int = 0
 
