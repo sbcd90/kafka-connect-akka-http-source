@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
 

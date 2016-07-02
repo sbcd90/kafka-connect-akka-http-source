@@ -1,6 +1,8 @@
 package io.confluent.connect
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import akka.stream.ActorMaterializer
 import io.confluent.connect.util.Version
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.source.SourceConnector
@@ -11,6 +13,9 @@ class AkkaHttpSourceConnector extends SourceConnector {
 
   private var hostname: String = _
   private var port: String = _
+
+  implicit val actorSystem = ActorSystem("Akka-Http-Kafka-Connect-source-connector")
+  implicit val fm = ActorMaterializer()
 
   override def version(): String = {
     Version.getVersion()
