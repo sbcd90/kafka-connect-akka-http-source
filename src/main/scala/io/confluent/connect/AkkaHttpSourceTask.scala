@@ -1,17 +1,21 @@
 package io.confluent.connect
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.StreamConverters
 import io.confluent.connect.avro.AvroConverter
 import io.confluent.connect.util.{KafkaCallback, Version}
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
+import org.apache.commons.io.IOUtils
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 
 import scala.concurrent.duration._
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
@@ -81,7 +85,8 @@ class AkkaHttpSourceTask extends SourceTask {
     request match {
       case HttpRequest(HttpMethods.POST, Uri.Path("/post"), _, _, _) =>
         Future[HttpResponse] {
-          val body = request.entity.toStrict(5 seconds).map(_.data.decodeString("UTF-8"))
+          val body = IOUtils.toString(request.entity.dataBytes.runWith(
+            StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS))))
           println(body)
 
           val sourcePartitions = new java.util.HashMap[String, String]()
