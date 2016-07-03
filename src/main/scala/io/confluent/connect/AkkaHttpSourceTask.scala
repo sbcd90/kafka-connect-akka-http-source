@@ -44,7 +44,7 @@ class AkkaHttpSourceTask extends SourceTask {
     producerProps.put(ProducerConfig.ACKS_CONFIG, "all")
     producerProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
 
-    producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
+//    producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
 
     offset += 1
   }
