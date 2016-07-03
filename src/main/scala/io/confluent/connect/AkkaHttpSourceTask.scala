@@ -2,7 +2,7 @@ package io.confluent.connect
 
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
 import io.confluent.connect.avro.AvroConverter
-import io.confluent.connect.util.Version
+import io.confluent.connect.util.{KafkaCallback, Version}
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 import org.apache.kafka.connect.data.Schema
@@ -14,6 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class AkkaHttpSourceTask extends SourceTask {
   private val producerProps: java.util.Map[String, Object] =
     new java.util.HashMap[String, Object]()
+  private val kafkaCallback = new KafkaCallback()
 
   // name of the constants
   private val topicname = "kafka.topic"
@@ -67,7 +68,7 @@ class AkkaHttpSourceTask extends SourceTask {
     val value = converter.fromConnectData(record.topic(), record.valueSchema(), record.value())
 
     val producerRecord = new ProducerRecord[Array[Byte], Array[Byte]](record.topic(), record.kafkaPartition(), key, value)
-    producer.send(producerRecord)
+    producer.send(producerRecord, kafkaCallback.getCallback())
   }
 
   def asyncHandler(request: HttpRequest): Future[HttpResponse] = {
@@ -85,11 +86,15 @@ class AkkaHttpSourceTask extends SourceTask {
           commitRecord(record)
           offset += 1
 
-          HttpResponse(entity = "Hello World")
+          var httpResponse = kafkaCallback.httpResponse
+          while (httpResponse == null) {
+            httpResponse = kafkaCallback.httpResponse
+          }
+          httpResponse
         }
       case HttpRequest(HttpMethods.GET, _, _, _, _) =>
         Future[HttpResponse] {
-          HttpResponse(entity = "Not implemented")
+          HttpResponse(entity = "Not implemented", status = 200)
         }
     }
   }
