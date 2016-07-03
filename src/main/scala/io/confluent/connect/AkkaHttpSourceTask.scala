@@ -95,7 +95,7 @@ class AkkaHttpSourceTask extends SourceTask {
           val sourceOffsets = new java.util.HashMap[String, String]()
           sourceOffsets.put("pos", offset.toString)
 
-          val record = new SourceRecord(sourcePartitions, sourceOffsets, topic, schema, "Hello World" + offset)
+          val record = new SourceRecord(sourcePartitions, sourceOffsets, topic, schema, body)
 
           commitRecord(record)
           offset += 1
