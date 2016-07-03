@@ -24,27 +24,9 @@ class AkkaHttpSourceTask extends SourceTask {
   private val schema = Schema.STRING_SCHEMA
 
   // custom offset handled by source
-  private var offset: Int = 0
+  private var offset: Int = 1
 
   override def start(map: java.util.Map[String, String]): Unit = {
-    topic = "test9"// map.get(topicname)
-    bootstrap_servers = "localhost:9092"// map.get(servers)
-
-    // copying settings from kafka source.
-    producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers)
-    producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
-    producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
-
-    // These settings are designed to ensure there is no data loss.
-    producerProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, Integer.MAX_VALUE.toString)
-    producerProps.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE.toString)
-    producerProps.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, Long.MaxValue.toString)
-    producerProps.put(ProducerConfig.ACKS_CONFIG, "all")
-    producerProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
-
-//    producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
-
-    offset += 1
   }
 
   override def stop(): Unit = {
@@ -60,6 +42,21 @@ class AkkaHttpSourceTask extends SourceTask {
   }
 
   override def commitRecord(record: SourceRecord): Unit = {
+    topic = "test9"// map.get(topicname)
+    bootstrap_servers = "localhost:9092"// map.get(servers)
+
+    // copying settings from kafka source.
+    producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers)
+    producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
+    producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
+
+    // These settings are designed to ensure there is no data loss.
+    producerProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, Integer.MAX_VALUE.toString)
+    producerProps.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE.toString)
+    producerProps.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, Long.MaxValue.toString)
+    producerProps.put(ProducerConfig.ACKS_CONFIG, "all")
+    producerProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+
     println(producerProps.entrySet().size())
     val producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
     val key = new AvroConverter().fromConnectData(record.topic(), record.keySchema(), record.key())
