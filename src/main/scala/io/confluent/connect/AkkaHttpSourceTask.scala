@@ -1,6 +1,8 @@
 package io.confluent.connect
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
+import akka.stream.ActorMaterializer
 import io.confluent.connect.avro.AvroConverter
 import io.confluent.connect.util.{KafkaCallback, Version}
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
@@ -8,10 +10,14 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, Produce
 import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 
+import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
+  implicit val actorSystem = ActorSystem("Akka-Http-Kafka-Connect-source-task")
+  implicit val fm = ActorMaterializer()
+
   private val producerProps: java.util.Map[String, Object] =
     new java.util.HashMap[String, Object]()
   private val kafkaCallback = new KafkaCallback()
@@ -73,8 +79,11 @@ class AkkaHttpSourceTask extends SourceTask {
 
   def asyncHandler(request: HttpRequest): Future[HttpResponse] = {
     request match {
-      case HttpRequest(HttpMethods.GET, Uri.Path("/post"), _, _, _) =>
+      case HttpRequest(HttpMethods.POST, Uri.Path("/post"), _, _, _) =>
         Future[HttpResponse] {
+          val body = request.entity.toStrict(5 seconds).map(_.data.decodeString("UTF-8"))
+          println(body)
+
           val sourcePartitions = new java.util.HashMap[String, String]()
           sourcePartitions.put("request", "akka-http")
 
@@ -92,7 +101,7 @@ class AkkaHttpSourceTask extends SourceTask {
           }
           httpResponse
         }
-      case HttpRequest(HttpMethods.GET, _, _, _, _) =>
+      case HttpRequest(_, _, _, _, _) =>
         Future[HttpResponse] {
           HttpResponse(entity = "Not implemented", status = 200)
         }
