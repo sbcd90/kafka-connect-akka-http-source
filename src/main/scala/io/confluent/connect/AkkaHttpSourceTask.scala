@@ -1,7 +1,5 @@
 package io.confluent.connect
 
-import java.util
-
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
 import io.confluent.connect.avro.AvroConverter
 import io.confluent.connect.util.Version
@@ -13,7 +11,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
-  private var producer: KafkaProducer[Array[Byte], Array[Byte]] = _
+  private var producerProps: java.util.HashMap[String, Object] = _
 
   // name of the constants
   private val topicname = "kafka.topic"
@@ -32,7 +30,6 @@ class AkkaHttpSourceTask extends SourceTask {
     bootstrap_servers = map.get(servers)
 
     // copying settings from kafka source.
-    val producerProps = new java.util.HashMap[String, Object]()
     producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers)
     producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
     producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
@@ -62,6 +59,7 @@ class AkkaHttpSourceTask extends SourceTask {
   }
 
   override def commitRecord(record: SourceRecord): Unit = {
+    val producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
     val key = new AvroConverter().fromConnectData(record.topic(), record.keySchema(), record.key())
     val value = new AvroConverter().fromConnectData(record.topic(), record.valueSchema(), record.value())
 
