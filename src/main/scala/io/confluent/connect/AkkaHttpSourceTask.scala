@@ -27,8 +27,8 @@ class AkkaHttpSourceTask extends SourceTask {
   private var offset: Int = 0
 
   override def start(map: java.util.Map[String, String]): Unit = {
-    topic = map.get(topicname)
-    bootstrap_servers = map.get(servers)
+    topic = "test9"// map.get(topicname)
+    bootstrap_servers = "localhost:9092"// map.get(servers)
 
     // copying settings from kafka source.
     producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers)
@@ -60,6 +60,7 @@ class AkkaHttpSourceTask extends SourceTask {
   }
 
   override def commitRecord(record: SourceRecord): Unit = {
+    println(producerProps.entrySet().size())
     val producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
     val key = new AvroConverter().fromConnectData(record.topic(), record.keySchema(), record.key())
     val value = new AvroConverter().fromConnectData(record.topic(), record.valueSchema(), record.value())
