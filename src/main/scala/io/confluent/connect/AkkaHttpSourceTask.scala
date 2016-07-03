@@ -1,6 +1,6 @@
 package io.confluent.connect
 
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
 import io.confluent.connect.avro.AvroConverter
 import io.confluent.connect.util.Version
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
@@ -72,7 +72,7 @@ class AkkaHttpSourceTask extends SourceTask {
 
   def asyncHandler(request: HttpRequest): Future[HttpResponse] = {
     request match {
-      case HttpRequest(HttpMethods.GET, _, _, _, _) =>
+      case HttpRequest(HttpMethods.GET, Uri.Path("/post"), _, _, _) =>
         Future[HttpResponse] {
           val sourcePartitions = new java.util.HashMap[String, String]()
           sourcePartitions.put("request", "akka-http")
@@ -86,6 +86,10 @@ class AkkaHttpSourceTask extends SourceTask {
           offset += 1
 
           HttpResponse(entity = "Hello World")
+        }
+      case HttpRequest(HttpMethods.GET, _, _, _, _) =>
+        Future[HttpResponse] {
+          HttpResponse(entity = "Not implemented")
         }
     }
   }
