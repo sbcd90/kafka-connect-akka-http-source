@@ -3,6 +3,7 @@ package io.confluent.connect
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
 import io.confluent.connect.avro.AvroConverter
 import io.confluent.connect.util.Version
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
@@ -42,6 +43,12 @@ class AkkaHttpSourceTask extends SourceTask {
   }
 
   override def commitRecord(record: SourceRecord): Unit = {
+    val config = new java.util.HashMap[String, Object]()
+    config.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081")
+
+    val converter = new AvroConverter()
+    converter.configure(config, false)
+
     topic = "test9"// map.get(topicname)
     bootstrap_servers = "localhost:9092"// map.get(servers)
 
@@ -59,8 +66,8 @@ class AkkaHttpSourceTask extends SourceTask {
 
     println(producerProps.entrySet().size())
     val producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
-    val key = new AvroConverter().fromConnectData(record.topic(), record.keySchema(), record.key())
-    val value = new AvroConverter().fromConnectData(record.topic(), record.valueSchema(), record.value())
+    val key = converter.fromConnectData(record.topic(), record.keySchema(), record.key())
+    val value = converter.fromConnectData(record.topic(), record.valueSchema(), record.value())
 
     val producerRecord = new ProducerRecord[Array[Byte], Array[Byte]](record.topic(), record.kafkaPartition(), key, value)
     producer.send(producerRecord)
