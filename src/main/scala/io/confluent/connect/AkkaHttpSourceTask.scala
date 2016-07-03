@@ -20,8 +20,8 @@ class AkkaHttpSourceTask extends SourceTask {
   private val servers = "kafka.bootstrap.servers"
 
   // should be taken as input from user
-  private var topic: String = _
-  private var bootstrap_servers: String = _
+  private val topic = "test9"
+  private val bootstrap_servers = "localhost:9092"
   private val schema = Schema.STRING_SCHEMA
 
   // custom offset handled by source
@@ -48,9 +48,6 @@ class AkkaHttpSourceTask extends SourceTask {
 
     val converter = new AvroConverter()
     converter.configure(config, false)
-
-    topic = "test9"// map.get(topicname)
-    bootstrap_servers = "localhost:9092"// map.get(servers)
 
     // copying settings from kafka source.
     producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers)
