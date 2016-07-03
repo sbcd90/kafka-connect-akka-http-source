@@ -11,7 +11,8 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
-  private var producerProps: java.util.HashMap[String, Object] = _
+  private val producerProps: java.util.Map[String, Object] =
+    new java.util.HashMap[String, Object]()
 
   // name of the constants
   private val topicname = "kafka.topic"
