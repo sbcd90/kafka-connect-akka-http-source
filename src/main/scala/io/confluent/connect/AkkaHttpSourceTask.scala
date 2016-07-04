@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.StreamConverters
+import com.typesafe.config.ConfigFactory
 import io.confluent.connect.avro.AvroConverter
 import io.confluent.connect.util.{KafkaCallback, Version}
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
@@ -15,7 +16,7 @@ import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AkkaHttpSourceTask extends SourceTask {
@@ -29,10 +30,15 @@ class AkkaHttpSourceTask extends SourceTask {
   // name of the constants
   private val topicname = "kafka.topic"
   private val servers = "kafka.bootstrap.servers"
+  private val schemaregurlname = "kafka.schema.registry.url"
+
+  // read config file
+  private val map = ConfigFactory.load("kafka-connect-akka-http-source.properties")
 
   // should be taken as input from user
-  private val topic = "test9"
-  private val bootstrap_servers = "localhost:9092"
+  private val topic = map.getString(topicname)
+  private val bootstrap_servers = map.getString(servers)
+  private val schemaregurl = map.getString(schemaregurlname)
   private val schema = Schema.STRING_SCHEMA
 
   // custom offset handled by source
@@ -55,7 +61,7 @@ class AkkaHttpSourceTask extends SourceTask {
 
   override def commitRecord(record: SourceRecord): Unit = {
     val config = new java.util.HashMap[String, Object]()
-    config.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081")
+    config.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaregurl)
 
     val converter = new AvroConverter()
     converter.configure(config, false)

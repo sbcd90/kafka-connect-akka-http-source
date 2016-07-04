@@ -8,8 +8,8 @@ import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.source.SourceConnector
 
 class AkkaHttpSourceConnector extends SourceConnector {
-  private val HOST_CONFIG = "hostname"
-  private val PORT_CONFIG = "port"
+  private val HOST_CONFIG = "akka.http.hostname"
+  private val PORT_CONFIG = "akka.http.port"
 
   private var hostname: String = _
   private var port: String = _

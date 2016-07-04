@@ -13,8 +13,7 @@ class KafkaCallback {
           httpResponse = HttpResponse(entity = ex.getMessage, status = 400)
         } else {
           println(recordMetadata.topic() + " - " + recordMetadata.partition() + " - " + recordMetadata.offset())
-          httpResponse = HttpResponse(entity = recordMetadata.topic() + " - " + recordMetadata.partition()
-            + " - " + recordMetadata.offset(), status = 200)
+          httpResponse = HttpResponse(entity = "success", status = 200)
         }
       }
     }
