@@ -42,6 +42,7 @@ class AkkaHttpSourceTask extends SourceTask {
 
   // will be filled by class implementor
   var schema: Schema = _
+  setSchema()
 
   // custom offset handled by source
   private var offset: Int = 1

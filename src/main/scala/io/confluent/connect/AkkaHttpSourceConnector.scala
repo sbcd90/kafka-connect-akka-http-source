@@ -26,6 +26,7 @@ class AkkaHttpSourceConnector extends SourceConnector {
   override def start(map: java.util.Map[String, String]): Unit = {
     hostname = map.get(HOST_CONFIG)
     port = map.get(PORT_CONFIG)
+
     Http().bindAndHandleAsync(new AkkaHttpSourceTask().asyncHandler, hostname, port.toInt)
   }
 
