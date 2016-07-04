@@ -11,7 +11,7 @@ mvn clean install
 Get the jar & put into the location pointed by `CLASSPATH` environment variable.
 See [installing custom plugins](http://docs.confluent.io/3.0.0/connect/userguide.html#installing-connector-plugins)
 
-### Run the plugin
+### Run the plugin in standalone mode
  
 ```
 ./bin/connect-standalone connect-avro-standalone.properties connect-akka-http-source.properties 
