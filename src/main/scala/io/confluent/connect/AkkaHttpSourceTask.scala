@@ -41,8 +41,7 @@ class AkkaHttpSourceTask extends SourceTask {
   private val schemaregurl = map.getString(schemaregurlname)
 
   // will be filled by class implementor
-  var schema: Schema = _
-  setSchema()
+  var schema = Schema.STRING_SCHEMA
 
   // custom offset handled by source
   private var offset: Int = 1
@@ -60,11 +59,6 @@ class AkkaHttpSourceTask extends SourceTask {
 
   override def version(): String = {
     Version.getVersion()
-  }
-
-  // can be overridden by an implemented class
-  def setSchema(): Unit = {
-    schema = Schema.STRING_SCHEMA
   }
 
   override def commitRecord(record: SourceRecord): Unit = {
